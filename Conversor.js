@@ -3,27 +3,44 @@ import { useState } from 'react'
 import Conversion from './Conversion'
 import Recorder from './Recorder'
 
+import arrows from './asset/arrows.svg'
+
+const DECIMALS = 2
+
 function unitOperation(type, value) {
     switch (type) {
         case 'ms':
-            return (parseFloat(value) / 1.609).toFixed(2)
+            return (parseFloat(value) / 1.609).toFixed(DECIMALS)
         case 'km':
-            return (parseFloat(value) * 1.609).toFixed(2)
+            return (parseFloat(value) * 1.609).toFixed(DECIMALS)
         case 'ft':
-            return (parseFloat(value) / 3.281).toFixed(2)
+            return (parseFloat(value) / 3.281).toFixed(DECIMALS)
         case 'mt':
-            return (parseFloat(value) * 3.281).toFixed(2)
+            return (parseFloat(value) * 3.281).toFixed(DECIMALS)
         case 'pg':
-
+            return (parseFloat(value) / 2.54).toFixed(DECIMALS)
         case 'cm':
+            return (parseFloat(value) * 2.54).toFixed(DECIMALS)
     }
+}
+
+function readLocalStorage() {
+    const array = []
+
+    for (let i = 0; i < localStorage.length; i++) {
+        const item = localStorage.getItem(localStorage.key(i))
+        const split = item.split('.')
+        array.push(new Conversion(parseFloat(split[0]), parseFloat(split[1]), split[2]))
+    }
+
+    return array
 }
 
 const Conversor = () => {
     let [input, setInput] = useState('')
     let [data, setData] = useState(0.0)
     let [type, setType] = useState('ms')
-    let [conversions, setConversions] = useState([])
+    let [conversions, setConversions] = useState(readLocalStorage())
 
     const handleSelect = (option) => {
         const target = option.target
@@ -37,7 +54,7 @@ const Conversor = () => {
                 } else {
                     setData(0.0)
                 }
-            }   break
+            } break
             case 'milles_km': {
                 setType('km')
                 if (input != "") {
@@ -46,14 +63,14 @@ const Conversor = () => {
                 } else {
                     setData(0.0)
                 }
-            }   break
+            } break
             case 'foot_meters': {
                 setType('mt')
                 if (input != "") {
                     const data = unitOperation("ft", input)
                     setData(data)
                 }
-            }   break
+            } break
             case 'meters_foot': {
                 setType('ft')
                 if (input != "") {
@@ -78,8 +95,27 @@ const Conversor = () => {
         }
     }
 
+    const reverseType = (type) => {
+        switch (type) {
+            case 'ms':
+                return 'km'
+            case 'km':
+                return 'ms'
+            case 'mt':
+                return 'ft'
+            case 'ft':
+                return 'mt'
+            case 'cm':
+                return 'inch'
+            case 'inch':
+                return 'cm'
+        }
+    }
+
     const addConversion = () => {
-        setConversions(conversions.concat(new Conversion(input, data)))
+        const conversion = new Conversion(input, data, type)
+        localStorage.setItem(`${conversion.input}${conversion.data}${type}${Math.round(Math.random() * 3600)}`, `${conversion.input}.${conversion.output}.${conversion.type}`)
+        setConversions(conversions.concat(conversion))
     }
 
     /**
@@ -102,15 +138,16 @@ const Conversor = () => {
 
     const deleteConversion = (element) => {
         const target = element.target
+        localStorage.removeItem(localStorage.key(target.id))
         setConversions(conversions.filter((value, index) => index != target.id))
     }
 
     return (
         <div className={"box"}>
-            <h3>convert</h3>
+            <h2 id={"convert"}>convert</h2>
             <div id={"values"}>
                 <div>
-                    <select onChange={ handleSelect }>
+                    <select onChange={handleSelect}>
                         <option value={"km_milles"}>Km to Milles</option>
                         <option value={"milles_km"}>Milles to Km</option>
                         <option value={"foot_meters"}>Foots to Meters</option>
@@ -118,26 +155,48 @@ const Conversor = () => {
                         <option value={"inch_cm"}>Inch to Cm</option>
                         <option value={"cm_inch"}>Cm to Inch</option>
                     </select>
-                    <input type={'number'} onChange={ handleInput } />
+                    <span></span>
+                    <input type={'text'} onChange={handleInput} />
+                    <img src={ arrows }/>
                 </div>
             </div>
-            <div>
-                <h3>{`${ data }${ type }`}</h3>
-                <button onClick={ addConversion } onChange={ addConversion }>Save</button>
+            <div className={"data-box"}>
+                <div className={"data-info"}>
+                    <h3>{`${data}${type}`}</h3>
+                </div>
+                <div className={"save"}>
+                    <p onClick={addConversion}>❣️</p>
+                </div>
             </div>
-            <Recorder conversions={ conversions.map((value, index) => {
+            <br /><br />
+            <h3 id={"saved"}>saved</h3>
+            <Recorder conversions={conversions.map((value, index) => {
                 return (
                     <>
-                        <div>
-                            <span>{`${ value.input } - ${ value.output }`}</span>
-                            <button id={ index } onClick={ deleteConversion }>Delete</button>
+                        <div id={"element"}>
+                            <span>{`${value.input}${reverseType(value.type)} - ${value.output}${value.type}`}</span>
+                            <h3 id={index} onClick={deleteConversion}>X</h3>
                         </div>
                     </>
-                )})}/>
+                )
+            })} />
 
             <style>
                 {
                     `
+                        body {
+                            display: flex;
+
+                            flex-flow: row wrap;
+
+                            align-items: center;
+                            justify-content: center;
+                        
+                            font-family: "Poppins";
+
+                            cursor: default;
+                        }
+
                         .box {
                             display: flex;
 
@@ -152,19 +211,42 @@ const Conversor = () => {
 
                             border-radius: 21px;
 
-                            font-family: system-ui;
+                            box-shadow: 0px 0px 5px black;
+                        }
+
+                        .data-box {
+                            display: flex;
+                            
+                            flex-flow: row wrap;
+
+                            alignt-items: center;
+                            justify-content: center;
+                        }
+
+                        .save {
+                            flex-direction: row;
+                        }
+
+                        .data-info {
+                            flex-direction: row-reverse;
+                        }
+
+                        #convert {
+                            margin-left: 20px;
                         }
 
                         #values {
                             display: flex;
 
-
                             flex-flow: column wrap;
 
                             align-items: center;
+                            justify-content: center;
                         }
 
                         #values select {
+                            margin-right: 135px;
+
                             width: 254px;
                             height: 32px;
                         }
@@ -174,8 +256,49 @@ const Conversor = () => {
                             height: 32px;
                         }
 
-                        h3 {
-                            margin: 20px;
+                        #element {
+                            display: flex;
+
+                            flex-flow: column wrap;
+
+                            background-color: gray;
+
+                            align-items: center;
+                            justify-content: center;
+
+                            width: 349px;
+                            height: 38px;
+
+                            border-radius: 10px;
+
+                            color: black;
+                        }
+
+                        #index {
+                            flex-direction: end;
+                        }
+
+                        #saved {
+                            color: black;
+                        }
+
+                        select {
+                            border: none;
+                            border-bottom: solid 2px white;
+                            color: white; 
+                            background-color: transparent;
+                        }
+
+                        option {
+                            color: black;
+                        }
+
+                        input {
+                            border: none;
+                            border-bottom: solid 2px white;
+                            color: white;
+                            background-color: transparent;
+                            text-align: right;
                         }
                     `
                 }
