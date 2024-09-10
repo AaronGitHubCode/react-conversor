@@ -4,23 +4,25 @@ import Conversion from './Conversion'
 import Recorder from './Recorder'
 
 import arrows from './asset/arrows.svg'
+import heart from './asset/heart.svg'
+import cross from './asset/cross.svg'
 
 const DECIMALS = 2
 
 function unitOperation(type, value) {
     switch (type) {
         case 'ms':
-            return (parseFloat(value) / 1.609).toFixed(DECIMALS)
+            return Math.fround((parseFloat(value) / 1.609)).toFixed(DECIMALS)
         case 'km':
-            return (parseFloat(value) * 1.609).toFixed(DECIMALS)
+            return Math.fround((parseFloat(value) * 1.609)).toFixed(DECIMALS)
         case 'ft':
-            return (parseFloat(value) / 3.281).toFixed(DECIMALS)
+            return Math.fround((parseFloat(value) / 3.281)).toFixed(DECIMALS)
         case 'mt':
-            return (parseFloat(value) * 3.281).toFixed(DECIMALS)
+            return Math.fround((parseFloat(value) * 3.281)).toFixed(DECIMALS)
         case 'pg':
-            return (parseFloat(value) / 2.54).toFixed(DECIMALS)
+            return Math.fround((parseFloat(value) / 2.54)).toFixed(DECIMALS)
         case 'cm':
-            return (parseFloat(value) * 2.54).toFixed(DECIMALS)
+            return Math.fround((parseFloat(value) * 2.54)).toFixed(DECIMALS)
     }
 }
 
@@ -142,6 +144,12 @@ const Conversor = () => {
         setConversions(conversions.filter((value, index) => index != target.id))
     }
 
+    const changeTypes = () => {
+        setType(reverseType(type))
+        setData(input)
+        setInput(data)
+    }
+
     return (
         <div className={"box"}>
             <h2 id={"convert"}>convert</h2>
@@ -155,9 +163,9 @@ const Conversor = () => {
                         <option value={"inch_cm"}>Inch to Cm</option>
                         <option value={"cm_inch"}>Cm to Inch</option>
                     </select>
-                    <span></span>
-                    <input type={'text'} onChange={handleInput} />
-                    <img src={ arrows }/>
+                    <img src={ arrows } onClick={ changeTypes }/>
+                    <input type={'text'} onChange={handleInput} value={input}/>
+                    <span>{reverseType(type)}</span>
                 </div>
             </div>
             <div className={"data-box"}>
@@ -165,7 +173,7 @@ const Conversor = () => {
                     <h3>{`${data}${type}`}</h3>
                 </div>
                 <div className={"save"}>
-                    <p onClick={addConversion}>❣️</p>
+                    <img onClick={ addConversion } src={ heart }/>
                 </div>
             </div>
             <br /><br />
@@ -175,7 +183,7 @@ const Conversor = () => {
                     <>
                         <div id={"element"}>
                             <span>{`${value.input}${reverseType(value.type)} - ${value.output}${value.type}`}</span>
-                            <h3 id={index} onClick={deleteConversion}>X</h3>
+                            <img id={ index } src={ cross } onClick={ deleteConversion }/>
                         </div>
                     </>
                 )
@@ -245,13 +253,14 @@ const Conversor = () => {
                         }
 
                         #values select {
-                            margin-right: 135px;
 
                             width: 254px;
                             height: 32px;
                         }
 
                         #values input {
+                            margin-left: 100px;
+
                             width: 254px;
                             height: 32px;
                         }
@@ -272,6 +281,10 @@ const Conversor = () => {
                             border-radius: 10px;
 
                             color: black;
+
+                            background: #E3E3E3;
+                            box-shadow: 0px 0px 2px 2px rgba(0, 0, 0, 0.1);
+                            border-radius: 10px;
                         }
 
                         #index {

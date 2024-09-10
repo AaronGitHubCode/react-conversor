@@ -2,18 +2,7 @@ import Conversor from './Conversor'
 
 const App = () => (
     <>
-        <div className={"header"}>
-            <header>
-                <h2>unit converter</h2>
-                <hr/><br/>
-            </header>
-        </div>
         <Conversor/>
-        <div className={"footer"}>
-            <footer>
-                <h1>footer</h1>
-            </footer>
-        </div>
         <style>
             {
                 `

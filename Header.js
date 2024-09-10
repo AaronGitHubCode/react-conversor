@@ -1,6 +1,0 @@
-const Header = () => {
-    return (
-        <>
-        </>
-    )
-}
