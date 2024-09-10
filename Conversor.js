@@ -32,7 +32,7 @@ function readLocalStorage() {
     for (let i = 0; i < localStorage.length; i++) {
         const item = localStorage.getItem(localStorage.key(i))
         const split = item.split('.')
-        array.push(new Conversion(parseFloat(split[0]), parseFloat(split[1]), split[2]))
+        array.push(new Conversion(parseFloat(split[0]), parseFloat(`${ split[1] }.${ split[2] }`), split[3]))
     }
 
     return array
